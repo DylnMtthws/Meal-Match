@@ -1,43 +1,75 @@
-import { View, Text, StyleSheet, FlatList, TextInput } from "react-native";
-import React, { useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TextInput,
+  TouchableOpacity,
+} from "react-native";
+import React, { useEffect, useState } from "react";
 import Colors from "@/constants/Colors";
 import { ScrollView } from "react-native-gesture-handler";
-import DBingredients from "@/assets/data/ingredients.json";
 import Ingredient from "../ingredient/ingredient";
 import { defaultStyles } from "@/constants/Styles";
+import { Ionicons } from "@expo/vector-icons";
+import NewIngredient from "../ingredient/newingredient";
+import { useRouter, router } from "expo-router";
+import { useStore } from "zustand";
+import useIngredientStore from "../store/ingredientstore";
 
 const ingredientslist = () => {
+  const { setIngredientsList } = useIngredientStore();
   const [searchQuery, setSearchQuery] = useState("");
-  const ingredients = DBingredients.ingredients;
-  const [ingredientList, setIngredientList] = useState([]);
+  const [ingreData, setIngreData] = useState([]);
+  const [refresh, setRefresh] = useState<number>(0);
+  const [selectedIngredients, setSelectedIngredients] = useState([]);
+
+  function addSelected() {
+    setIngredientsList(selectedIngredients);
+    router.back();
+  }
+
+  useEffect(() => {
+    fetch("http://localhost:5555/ingredients")
+      .then((r) => r.json())
+      .then((data) => setIngreData(data));
+  }, [refresh]);
+
   function handleAdd(newIngredient) {
-    setIngredientList([...ingredientList, newIngredient]);
+    setSelectedIngredients([...selectedIngredients, newIngredient]);
   }
 
   function handleRemove(removeIngredient) {
-    const filteredIngredients = ingredientList.filter((ingredient) => {
+    const filteredIngredients = selectedIngredients.filter((ingredient) => {
       return ingredient.id !== removeIngredient.id;
     });
-    setIngredientList(filteredIngredients);
+    setSelectedIngredients(filteredIngredients);
   }
 
-  const searchIngredients = ingredients.filter((ingredient) => {
+  const searchIngredients = ingreData.filter((ingredient) => {
     return ingredient.name.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
   return (
     <>
       <View style={styles.searchContainer}>
-        <TextInput
-          onChangeText={setSearchQuery}
-          style={defaultStyles.inputField}
-          placeholder="Search"
-          placeholderTextColor={Colors.grey}
-        />
+        <View
+          style={[
+            defaultStyles.inputField,
+            { flexDirection: "row", justifyContent: "space-between" },
+          ]}
+        >
+          <TextInput
+            onChangeText={setSearchQuery}
+            placeholder="Search"
+            placeholderTextColor={Colors.grey}
+          />
+          <Ionicons name="ios-search-outline" size={24} color={Colors.grey} />
+        </View>
       </View>
 
       <ScrollView style={styles.container}>
-        <View style={{ marginBottom: 40 }}>
+        <View style={{ marginBottom: 175 }}>
           {searchIngredients.length > 0
             ? searchIngredients.map((ingredient, index) => (
                 <Ingredient
@@ -47,7 +79,7 @@ const ingredientslist = () => {
                   handleRemove={handleRemove}
                 />
               ))
-            : ingredients.map((ingredient, index) => (
+            : ingreData.map((ingredient, index) => (
                 <Ingredient
                   key={index}
                   ingredient={ingredient}
@@ -57,6 +89,20 @@ const ingredientslist = () => {
               ))}
         </View>
       </ScrollView>
+      {selectedIngredients.length > 0 ? (
+        <View style={styles.absoluteView}>
+          <TouchableOpacity style={styles.btn} onPress={addSelected}>
+            <Text style={{ fontFamily: "sat-sb", color: "#fff" }}>Add</Text>
+            <Ionicons
+              name="add-circle-outline"
+              size={24}
+              style={{ marginLeft: 10 }}
+              color={"#fff"}
+            />
+          </TouchableOpacity>
+        </View>
+      ) : null}
+      <NewIngredient setRefresh={setRefresh} refresh={refresh} />
     </>
   );
 };
@@ -86,6 +132,21 @@ const styles = StyleSheet.create({
     color: "#000",
     fontSize: 16,
     fontFamily: "sat-sb",
+  },
+  absoluteView: {
+    position: "absolute",
+    bottom: 100,
+    width: "100%",
+    alignItems: "center",
+  },
+  btn: {
+    backgroundColor: Colors.primary,
+    padding: 14,
+    height: 50,
+    borderRadius: 30,
+    flexDirection: "row",
+    marginHorizontal: "auto",
+    alignItems: "center",
   },
 });
 

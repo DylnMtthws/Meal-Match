@@ -1,86 +1,78 @@
-from models import User, Recipe, Ingredient, RecipeIngredient, Selection
+#!/usr/bin/env python3
+
+# Standard library imports
+
 # Remote library imports
 from flask import request, session
 from flask_restful import Resource
 
 # Local imports
 from config import app, db, api
-
-
-class Users(Resource):
-    def get(self):
-        users = [user.to_dict() for user in User.query.all()]
-        return users, 200
-
-    def post(self):
-        data = request.get_json()
-        new_user = User(**data)
-        db.session.add(new_user)
-        db.session.commit()
-        return new_user.to_dict(), 201
-
-
-class UserById(Resource):
-    def get(self, id):
-        user = User.query.get(id)
-        if not user:
-            abort(404, message="User not found")
-        return jsonify(user.to_dict())
-
-    def patch(self, id):
-        user = User.query.get(id)
-        if not user:
-            abort(404, message="User not found")
-        data = request.get_json()
-        user.update(data)
-        db.session.commit()
-        return user
-
-    def delete(self, id):
-        user = User.query.get(id)
-        if not user:
-            abort(404, message="User not found")
-        db.session.delete(user)
-        db.session.commit()
-        return "User was successfully deleted"
+# Add your model imports
+from models import Recipe, Ingredient, RecipeIngredient
 
 
 class Recipes(Resource):
     def get(self):
-        recipes = [recipe.to_dict() for recipe in Recipe.query.all()]
+        recipes = [recipe.to_dict(only=("name", "recipe_ingredients.ingredient.name"))
+                   for recipe in Recipe.query.all()]
         return recipes, 200
 
     def post(self):
         data = request.get_json()
-        new_recipe = Recipe(**data)
-        db.session.add(new_recipe)
-        db.session.commit()
-        return new_recipe.to_dict(), 201
+        try:
+            new_recipe = Recipe(
+                name=data['name'],
+            )
+            db.session.add(new_recipe)
+            db.session.commit()
+            return new_recipe.to_dict(), 200
+        except ValueError:
+            return {
+                "errors": ["validation errors"]
+            }, 400
+
+
+api.add_resource(Recipes, "/recipes")
 
 
 class RecipeById(Resource):
     def get(self, id):
-        recipe = Recipe.query.get(id)
-        if not recipe:
-            abort(404, message="Recipe not found")
-        return jsonify(recipe.to_dict())
+        recipe = Recipe.query.filter_by(id=id).first()
+        return recipe.to_dict(only=("name")), 200
 
     def patch(self, id):
-        recipe = Recipe.query.get(id)
+        recipe = Recipe.query.filter_by(id=id).first()
         if not recipe:
-            abort(404, message="Recipe not found")
+            return {
+                "error": "Event not found"
+            }, 404
         data = request.get_json()
-        recipe.update(data)
-        db.session.commit()
-        return recipe
+
+        try:
+            for key in data:
+                setattr(recipe, key, data[key])
+            db.session.add(recipe)
+            db.session.commit()
+        except ValueError as e:
+            print(e.__str__())
+            return {
+                "error": "validation errors"
+            }, 400
+
+        return recipe.to_dict(only=("name")), 200
 
     def delete(self, id):
-        recipe = Recipe.query.get(id)
+        recipe = Recipe.query.filter_by(id=id).first()
         if not recipe:
-            abort(404, message="Recipe not found")
+            return {"error": "Event not found"}, 404
+
         db.session.delete(recipe)
         db.session.commit()
-        return "Recipe was successfully deleted"
+        return "", 204
+
+
+api.add_resource(RecipeById, "/recipes/<int:id>")
 
 
 class Ingredients(Resource):
@@ -91,35 +83,61 @@ class Ingredients(Resource):
 
     def post(self):
         data = request.get_json()
-        new_ingredient = Ingredient(**data)
-        db.session.add(new_ingredient)
-        db.session.commit()
-        return new_ingredient.to_dict(), 201
+        try:
+            new_ingredient = Ingredient(
+                name=data["name"],
+            )
+            db.session.add(new_ingredient)
+            db.session.commit()
+            return new_ingredient.to_dict(), 201
+        except Exception as e:
+            print(e.__str__())
+            return {
+                "errors": ["validation errors"]
+            }, 400
+
+
+api.add_resource(Ingredients, "/ingredients")
 
 
 class IngredientById(Resource):
     def get(self, id):
-        ingredient = Ingredient.query.get(id)
-        if not ingredient:
-            abort(404, message="Ingredient not found")
-        return jsonify(ingredient.to_dict())
+        ingredient = Ingredient.query.filter_by(id=id).first()
+        return ingredient.to_dict(), 200
 
     def patch(self, id):
-        ingredient = Ingredient.query.get(id)
+        ingredient = Ingredient.query.filter_by(id=id).first()
         if not ingredient:
-            abort(404, message="Ingredient not found")
+            return {
+                "error": "Event not found"
+            }, 404
         data = request.get_json()
-        ingredient.update(data)
-        db.session.commit()
-        return ingredient
+
+        try:
+            for key in data:
+                setattr(ingredient, key, data[key])
+            db.session.add(ingredient)
+            db.session.commit()
+        except ValueError as e:
+            print(e.__str__())
+            return {
+                "error": "validation errors"
+            }, 400
+
+        return ingredient.to_dict(only=("name")), 200
 
     def delete(self, id):
-        ingredient = Ingredient.query.get(id)
+        ingredient = Ingredient.query.filter_by(id=id).first()
         if not ingredient:
-            abort(404, message="Ingredient not found")
+            return {
+                "error": "Event not found"
+            }, 404
         db.session.delete(ingredient)
         db.session.commit()
-        return "Ingredient was successfully deleted"
+        return "", 204
+
+
+api.add_resource(IngredientById, "/ingredients/<int:id>")
 
 
 class RecipeIngredients(Resource):
@@ -130,86 +148,68 @@ class RecipeIngredients(Resource):
 
     def post(self):
         data = request.get_json()
-        new_recipe_ingredient = RecipeIngredient(**data)
-        db.session.add(new_recipe_ingredient)
-        db.session.commit()
-        return new_recipe_ingredient.to_dict(), 201
+        try:
+            new_recipe_ingredients = RecipeIngredient(
+                recipe_id=data["recipe_id"],
+                ingredient_id=data["ingredient_id"]
+            )
+            db.session.add(new_recipe_ingredients)
+            db.session.commit()
+            return new_recipe_ingredients.to_dict(only=("recipe_id", "ingredient_id")), 201
+        except ValueError as e:
+            print(e.__str__())
+            return {
+                "errors": ["validation errors"]
+            }, 400
+
+
+api.add_resource(RecipeIngredients, "/recipe_ingredients")
 
 
 class RecipeIngredientById(Resource):
-    def get(self, id):
-        recipe_ingredient = RecipeIngredient.query.get(id)
-        if not recipe_ingredient:
-            abort(404, message="RecipeIngredient not found")
-        return jsonify(recipe_ingredient.to_dict())
 
-    def patch(self, id):
-        recipe_ingredient = RecipeIngredient.query.get(id)
-        if not recipe_ingredient:
-            abort(404, message="RecipeIngredient not found")
-        data = request.get_json()
-        recipe_ingredient.update(data)
-        db.session.commit()
-        return recipe_ingredient
+    def get(self, id):
+        recipe_ingredient = RecipeIngredient.query.filter_by(id=id).first()
+        return recipe_ingredient.to_dict(only=("recipe_id", "ingredient_id")), 200
 
     def delete(self, id):
-        recipe_ingredient = RecipeIngredient.query.get(id)
+        recipe_ingredient = RecipeIngredient.query.filter_by(id=id).first()
         if not recipe_ingredient:
-            abort(404, message="RecipeIngredient not found")
+            return {"error": "Event not found"}, 404
+
         db.session.delete(recipe_ingredient)
         db.session.commit()
-        return "RecipeIngredient was successfully deleted"
-
-
-class Selections(Resource):
-    def get(self):
-        selections = [selection.to_dict()
-                      for selection in Selection.query.all()]
-        return selections, 200
-
-    def post(self):
-        data = request.get_json()
-        new_selection = Selection(**data)
-        db.session.add(new_selection)
-        db.session.commit()
-        return new_selection.to_dict(), 201
-
-
-class SelectionById(Resource):
-    def get(self, id):
-        selection = Selection.query.get(id)
-        if not selection:
-            abort(404, message="Selection not found")
-        return jsonify(selection.to_dict())
+        return "", 204
 
     def patch(self, id):
-        selection = Selection.query.get(id)
-        if not selection:
-            abort(404, message="Selection not found")
+        recipe_ingredient = RecipeIngredient.query.filter_by(id=id).first()
+        if not recipe_ingredient:
+            return {
+                "error": "Event not found"
+            }, 404
         data = request.get_json()
-        selection.update(data)
-        db.session.commit()
-        return selection
 
-    def delete(self, id):
-        selection = Selection.query.get(id)
-        if not selection:
-            abort(404, message="Selection not found")
-        db.session.delete(selection)
-        db.session.commit()
-        return "Selection was successfully deleted"
+        try:
+            for key in data:
+                setattr(recipe_ingredient, key, data[key])
+            db.session.add(recipe_ingredient)
+            db.session.commit()
+        except ValueError as e:
+            print(e.__str__())
+            return {
+                "error": "validation errors"
+            }, 400
+
+        return recipe_ingredient.to_dict(only=("recipe_id", "ingredient_id")), 200
 
 
-api.add_resource(Users, "/users")
-api.add_resource(UserById, "/users/<int:id>")
-api.add_resource(Recipes, "/recipes")
-api.add_resource(RecipeById, "/recipes/<int:id>")
-api.add_resource(Ingredients, "/ingredients")
-api.add_resource(IngredientById, "/ingredients/<int:id>")
-api.add_resource(RecipeIngredients, "/recipe_ingredients")
 api.add_resource(RecipeIngredientById, "/recipe_ingredients/<int:id>")
-api.add_resource(Selections, "/selections")
-api.add_resource(SelectionById, "/selections/<int:id>")
 
-if __name__ == "__main__":
-    app.run(debug=True)
+
+@app.route('/')
+def index():
+    return '<h1>Project Server</h1>'
+
+
+if __name__ == '__main__':
+    app.run(port=5555, debug=True)

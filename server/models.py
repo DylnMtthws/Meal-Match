@@ -1,121 +1,67 @@
-from sqlalchemy import Column, Integer, String, Text, Boolean, Enum, ForeignKey, Float
 from sqlalchemy_serializer import SerializerMixin
-from sqlalchemy.orm import relationship
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.ext.associationproxy import association_proxy
+from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import validates
-from datetime import datetime
-from config import db, bcrypt
-from sqlalchemy.ext.hybrid import hybrid_property
-
-
-class User(db.Model, SerializerMixin):
-    __tablename__ = 'users'
-
-    id = Column(Integer, primary_key=True)
-    username = Column(String, unique=True)
-    email = Column(String, unique=True)
-    password = Column(String)
-
-    recipes = relationship('Recipe', back_populates='chef')
-    selections = relationship('Selection', back_populates='patron')
-    favorite_recipes = relationship('Recipe', secondary='recipe_patron')
-
-    serializer_rules = {
-        'id': lambda obj: obj.id,
-        'username': lambda obj: obj.username,
-        'email': lambda obj: obj.email,
-    }
-
-    @validates('username')
-    def validate_username(self, key, username):
-        if not username:
-            raise ValueError('must be a username')
-        return username
-
-    @validates('email')
-    def validate_email(self, key, email):
-        if not email:
-            raise ValueError('must be an email')
-        return email
-
-    def __repr__(self):
-        return f'<User {self.id}: {self.username}>'
+from config import db
 
 
 class Recipe(db.Model, SerializerMixin):
     __tablename__ = 'recipes'
 
-    id = Column(Integer, primary_key=True)
-    name = Column(String)
-    description = Column(Text)
-    user_id = Column(Integer, ForeignKey('users.id'))
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
 
-    chef = relationship('User', back_populates='recipes')
-    recipe_ingredients = relationship(
-        'RecipeIngredient', back_populates='recipe')
+    recipe_ingredients = db.relationship(
+        'RecipeIngredient', back_populates='recipe', cascade="all, delete")
+
+    serialize_rules = ('-recipe_ingredients.recipe',)
+
+    @validates('name')
+    def validate_name(self, key, name):
+        if not name:
+            raise ValueError('Name required')
+        return name
 
     def __repr__(self):
         return f'<Recipe {self.id}: {self.name}>'
-
-    serializer_rules = {
-        'id': lambda obj: obj.id,
-        'name': lambda obj: obj.name,
-        'description': lambda obj: obj.description,
-    }
 
 
 class Ingredient(db.Model, SerializerMixin):
     __tablename__ = 'ingredients'
 
-    id = Column(Integer, primary_key=True)
-    name = Column(String)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
 
-    recipe_ingredients = relationship(
-        'RecipeIngredient', back_populates='ingredient')
+    recipe_ingredients = db.relationship(
+        'RecipeIngredient', back_populates='ingredient', cascade='all, delete')
 
-    serializer_rules = {
-        'id': lambda obj: obj.id,
-        'name': lambda obj: obj.name,
-    }
+    serialize_rules = ('-recipe_ingredients.ingredient',)
+
+    @validates('name')
+    def validate_name(self, key, name):
+        if not name:
+            raise ValueError('Name required')
+        return name
 
     def __repr__(self):
-        return f'<Ingredient {self.id}: {self.name}>'
+        return f'<Ingredient {self.id}: {self.title}>'
 
 
 class RecipeIngredient(db.Model, SerializerMixin):
     __tablename__ = 'recipe_ingredients'
 
-    recipe_id = Column(Integer, ForeignKey('recipes.id'), primary_key=True)
-    ingredient_id = Column(Integer, ForeignKey(
-        'ingredients.id'), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
 
-    recipe = relationship('Recipe', back_populates='recipe_ingredients')
-    ingredient = relationship(
+    recipe_id = db.Column(db.Integer, db.ForeignKey(
+        'recipes.id'), nullable=False)
+    ingredient_id = db.Column(db.Integer, db.ForeignKey(
+        'ingredients.id'), nullable=False)
+
+    recipe = db.relationship('Recipe', back_populates='recipe_ingredients')
+    ingredient = db.relationship(
         'Ingredient', back_populates='recipe_ingredients')
 
-    serializer_rules = {
-        'recipe_id': lambda obj: obj.recipe_id,
-        'ingredient_id': lambda obj: obj.ingredient_id,
-    }
+    serialize_rules = ('-recipe.recipe_ingredients',
+                       '-ingredient.recipe_ingredients',)
 
     def __repr__(self):
-        return f'<RecipeIngredient {self.recipe_id}: {self.ingredient_id}>'
-
-
-class Selection(db.Model, SerializerMixin):
-    __tablename__ = 'selections'
-
-    id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('users.id'))
-    recipe_id = Column(Integer, ForeignKey('recipes.id'))
-
-    patron = relationship('User', back_populates='selections')
-    recipe = relationship('Recipe')
-
-    serializer_rules = {
-        'id': lambda obj: obj.id,
-    }
-
-    def __repr__(self):
-        return f'<Selection {self.id}>'
+        return f'<RecipeIngredients {self.id}>'

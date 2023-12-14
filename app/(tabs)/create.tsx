@@ -1,4 +1,11 @@
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  FlatList,
+  TouchableOpacityBase,
+} from "react-native";
 import React, { useEffect, useState } from "react";
 import { defaultStyles } from "@/constants/Styles";
 import { TextInput } from "react-native-gesture-handler";
@@ -6,92 +13,73 @@ import { Ionicons } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
 import DBIngredients from "@/assets/data/ingredients.json";
 import { Link } from "expo-router";
+import useIngredientStore from "../store/ingredientstore";
+import useStateReset from "@/app/store/refresh";
 
 const CreateNewRecipe = () => {
-  const [selectedIngredients, setSelectedIngredients] = useState([]);
-  const [ingredients, setIngredients] = useState(DBIngredients);
-
-  // useEffect(() => {
-  //   //NEED TO CONNECT TO BACKEND
-  //   fetch("/ingredients")
-  //     .then((response) => response.json())
-  //     .then((data) => setIngredients(data))
-  //     .catch((error) => console.error(error));
-  // }, []);
-
-  const handleAddIngredient = () => {
-    setSelectedIngredients([
-      ...selectedIngredients,
-      { id: null, selected: false },
-    ]);
-  };
-
-  const handleSelectIngredient = (index) => {
-    setSelectedIngredients((prevState) => {
-      const newSelectedIngredients = [...prevState];
-      newSelectedIngredients[index].selected =
-        !newSelectedIngredients[index].selected;
-      return newSelectedIngredients;
+  const { ingredientsList, removeIngredient, clearIngredientsList } =
+    useIngredientStore();
+  const { changeState, state } = useStateReset();
+  const [name, setName] = useState("");
+  const handleChange = (text) => {
+    setName({
+      ...name,
+      name: text,
     });
   };
 
-  // const handleSubmit = () => {
-  //   const recipeName = /* get the recipe name from the state */;
-  //   const recipeDescription = /* get the recipe description from the state */;
+  const handleSubmit = () => {
+    fetch("http://localhost:5555/recipes", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(name),
+    })
+      .then((r) => r.json())
+      .then((recipe) => {
+        const recipe_id = recipe.id;
 
-  //   // create the new recipe
-  //   fetch('http://localhost:5000/recipes', {
-  //     method: 'POST',
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //     },
-  //     body: JSON.stringify({ name: recipeName, description: recipeDescription }),
-  //   })
-  //     .then(response => response.json())
-  //     .then(recipe => {
-  //       // add the ingredients to the recipe
-  //       selectedIngredients
-  //         .filter(ingredient => ingredient.selected)
-  //         .forEach(ingredient => {
-  //           fetch('http://localhost:5000/recipeingredients', {
-  //             method: 'POST',
-  //             headers: {
-  //               'Content-Type': 'application/json',
-  //             },
-  //             body: JSON.stringify({ recipe_id: recipe.id, ingredient_id: ingredient.id }),
-  //           });
-  //         });
-  //     })
-  //     .catch(error => console.error(error));
-  //  };
+        ingredientsList.forEach((ingredient) => {
+          const data = {
+            recipe_id,
+            ingredient_id: ingredient.id,
+          };
+          console.log(data);
 
+          fetch("http://localhost:5555/recipe_ingredients", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          }).then((r) => r.json());
+        });
+      })
+      .then(() => {
+        setName({ name: "" });
+        clearIngredientsList();
+        changeState();
+      });
+  };
+
+  function handleRemove(ingredient) {
+    removeIngredient(ingredient);
+  }
   return (
     <View style={styles.container}>
       <TextInput
         style={[defaultStyles.inputField, { marginBottom: 30 }]}
         placeholder="Recipe Name"
         placeholderTextColor="#000"
-      />
-      <TextInput
-        style={[defaultStyles.inputField, { marginBottom: 30 }]}
-        placeholder="Recipe Description"
-        placeholderTextColor="#000"
+        onChangeText={handleChange}
+        value={name.name}
       />
 
-      {selectedIngredients.map((ingredient, index) => (
-        <View key={index}>
-          <Text>{ingredient.name}</Text>
-          <Ionicons
-            name={ingredient.selected ? "checkmark-circle" : "add-circle"}
-            size={24}
-            onPress={() => handleSelectIngredient(index)}
-          />
-        </View>
-      ))}
       <Link
         href={"/(modals)/ingredientslist"}
         asChild
-        style={[styles.btnOutline, { marginBottom: 30 }]}
+        style={[styles.btnOutline, { marginBottom: 20 }]}
       >
         <TouchableOpacity>
           <Ionicons
@@ -103,10 +91,67 @@ const CreateNewRecipe = () => {
         </TouchableOpacity>
       </Link>
 
-      <TouchableOpacity style={styles.btnOutline}>
-        <Ionicons name="cart-outline" size={24} style={defaultStyles.btnIcon} />
-        <Text style={styles.btnOutlineText}>Submit</Text>
-      </TouchableOpacity>
+      <View style={styles.seperatorView}>
+        <View
+          style={{
+            flex: 1,
+            borderBottomColor: "black",
+            borderBottomWidth: StyleSheet.hairlineWidth,
+          }}
+        />
+        <Ionicons
+          style={styles.seperator}
+          name="chevron-down-outline"
+          size={24}
+        />
+        <View
+          style={{
+            flex: 1,
+            borderBottomColor: "black",
+            borderBottomWidth: StyleSheet.hairlineWidth,
+          }}
+        />
+      </View>
+
+      <View>
+        {ingredientsList &&
+          ingredientsList.map((ingredient) => (
+            <View
+              key={ingredient.id}
+              style={[
+                styles.btnOutline,
+                {
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  marginBottom: 30,
+                },
+              ]}
+            >
+              <Text style={styles.btnOutlineText}>{ingredient.name}</Text>
+              <Ionicons
+                name="remove-circle-outline"
+                style={[
+                  defaultStyles.btnIcon,
+                  { marginLeft: 325, color: Colors.red },
+                ]}
+                size={24}
+                onPress={() => handleRemove(ingredient)}
+              />
+            </View>
+          ))}
+      </View>
+
+      <View style={styles.absoluteView}>
+        <TouchableOpacity style={styles.btn} onPress={handleSubmit}>
+          <Text style={{ fontFamily: "sat-sb", color: "#fff" }}>Create</Text>
+          <Ionicons
+            name="paper-plane-outline"
+            size={24}
+            style={{ marginLeft: 10 }}
+            color={"#fff"}
+          />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -132,6 +177,33 @@ const styles = StyleSheet.create({
     color: "#000",
     fontSize: 16,
     fontFamily: "sat-sb",
+  },
+  absoluteView: {
+    position: "absolute",
+    bottom: 30,
+    width: "100%",
+    alignItems: "center",
+    marginLeft: 25,
+  },
+  btn: {
+    backgroundColor: Colors.primary,
+    padding: 14,
+    height: 50,
+    borderRadius: 30,
+    flexDirection: "row",
+    marginHorizontal: "auto",
+    alignItems: "center",
+  },
+  seperatorView: {
+    flexDirection: "row",
+    gap: 10,
+    alignItems: "center",
+    marginVertical: 30,
+  },
+  seperator: {
+    fontFamily: "mon-sb",
+    color: Colors.grey,
+    fontSize: 16,
   },
 });
 
