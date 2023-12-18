@@ -9,12 +9,12 @@ from flask_restful import Resource
 # Local imports
 from config import app, db, api
 # Add your model imports
-from models import Recipe, Ingredient, RecipeIngredient
+from models import Recipe, Ingredient, RecipeIngredient, Selections
 
 
 class Recipes(Resource):
     def get(self):
-        recipes = [recipe.to_dict(only=("name", "recipe_ingredients.ingredient.name"))
+        recipes = [recipe.to_dict()
                    for recipe in Recipe.query.all()]
         return recipes, 200
 
@@ -204,6 +204,71 @@ class RecipeIngredientById(Resource):
 
 
 api.add_resource(RecipeIngredientById, "/recipe_ingredients/<int:id>")
+
+
+class SelectionsResource(Resource):
+    def get(self):
+        selections = [selection.to_dict()
+                      for selection in Selections.query.all()]
+        return selections, 200
+
+    def post(self):
+        data = request.get_json()
+        try:
+            new_selection = Selections(
+                recipe_id=data['recipe_id'],
+            )
+            db.session.add(new_selection)
+            db.session.commit()
+            return new_selection.to_dict(), 201
+        except ValueError as e:
+            print(e.__str__())
+            return {
+                "errors": ["validation errors"]
+            }, 400
+
+
+api.add_resource(SelectionsResource, "/selections")
+
+
+class SelectionsById(Resource):
+
+    def get(self, id):
+        selection = Selections.query.filter_by(id=id).first()
+        return selection.to_dict(only=("recipe_id")), 200
+
+    def delete(self, id):
+        selection = Selections.query.filter_by(id=id).first()
+        if not selection:
+            return {"error": "Event not found"}, 404
+
+        db.session.delete(selection)
+        db.session.commit()
+        return "", 204
+
+    def patch(self, id):
+        selection = Selections.query.filter_by(id=id).first()
+        if not selection:
+            return {
+                "error": "Event not found"
+            }, 404
+        data = request.get_json()
+
+        try:
+            for key in data:
+                setattr(selection, key, data[key])
+            db.session.add(selection)
+            db.session.commit()
+        except ValueError as e:
+            print(e.__str__())
+            return {
+                "error": "validation errors"
+            }, 400
+
+        return selection.to_dict(only=("recipe_id")), 200
+
+
+api.add_resource(SelectionsById, "/selections/<int:id>")
 
 
 @app.route('/')

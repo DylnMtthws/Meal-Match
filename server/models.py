@@ -13,7 +13,9 @@ class Recipe(db.Model, SerializerMixin):
     recipe_ingredients = db.relationship(
         'RecipeIngredient', back_populates='recipe', cascade="all, delete")
 
-    serialize_rules = ('-recipe_ingredients.recipe',)
+    selection = db.relationship('Selections', back_populates='recipe')
+
+    serialize_rules = ('-recipe_ingredients.recipe', '-selection.recipe',)
 
     @validates('name')
     def validate_name(self, key, name):
@@ -65,3 +67,19 @@ class RecipeIngredient(db.Model, SerializerMixin):
 
     def __repr__(self):
         return f'<RecipeIngredients {self.id}>'
+
+
+class Selections(db.Model, SerializerMixin):
+    __tablename__ = 'selections'
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    recipe_id = db.Column(db.Integer, db.ForeignKey(
+        'recipes.id'), nullable=False)
+
+    recipe = db.relationship('Recipe', back_populates='selection')
+
+    serialize_rules = ('-recipe.selection',)
+
+    def __repr__(self):
+        return f'<Selections {self.id}>'

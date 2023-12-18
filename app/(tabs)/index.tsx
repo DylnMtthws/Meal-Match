@@ -1,6 +1,9 @@
-import { View, Text } from "react-native";
+import { View, Text, SafeAreaView } from "react-native";
 import React, { useMemo, useState, useEffect } from "react";
 import { Stack } from "expo-router";
+import { defaultStyles } from "@/constants/Styles";
+import { Ionicons } from "@expo/vector-icons";
+import Colors from "@/constants/Colors";
 // import ExploreHeader from "@/components/ExploreHeader";
 
 const Page = () => {
@@ -12,9 +15,17 @@ const Page = () => {
   const [recipesData, setRecipesData] = useState([]);
 
   return (
-    <View style={{ flex: 1 }}>
-      <Text>Home</Text>
-    </View>
+    <SafeAreaView style={defaultStyles.container}>
+      <Ionicons
+        name="restaurant-outline"
+        size={40}
+        color={Colors.primary}
+        style={{ alignSelf: "center", margin: 10 }}
+      />
+      <View style={{ flex: 1 }}>
+        <Text>Home</Text>
+      </View>
+    </SafeAreaView>
   );
 };
 

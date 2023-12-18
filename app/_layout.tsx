@@ -92,6 +92,25 @@ function RootLayoutNav() {
         }}
       />
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="ingredient/ingredientslist"
+        options={{
+          headerShown: true,
+          headerTitle: () => (
+            <Ionicons
+              name="restaurant-outline"
+              size={36}
+              color={Colors.primary}
+              style={{ alignSelf: "center" }}
+            />
+          ),
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => router.back()}>
+              <Ionicons name="close-outline" size={28} />
+            </TouchableOpacity>
+          ),
+        }}
+      />
     </Stack>
   );
 }

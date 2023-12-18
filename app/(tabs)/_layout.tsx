@@ -12,6 +12,7 @@ const Layout = () => {
         tabBarLabelStyle: {
           fontFamily: "sat-sb",
         },
+        headerShown: false,
       }}
     >
       <Tabs.Screen

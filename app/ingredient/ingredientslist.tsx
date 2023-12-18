@@ -5,14 +5,16 @@ import {
   FlatList,
   TextInput,
   TouchableOpacity,
+  SafeAreaViewBase,
+  SafeAreaView,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import Colors from "@/constants/Colors";
 import { ScrollView } from "react-native-gesture-handler";
-import Ingredient from "../ingredient/ingredient";
+import Ingredient from "./ingredient";
 import { defaultStyles } from "@/constants/Styles";
 import { Ionicons } from "@expo/vector-icons";
-import NewIngredient from "../ingredient/newingredient";
+import NewIngredient from "./newingredient";
 import { useRouter, router } from "expo-router";
 import { useStore } from "zustand";
 import useIngredientStore from "../store/ingredientstore";
@@ -51,7 +53,13 @@ const ingredientslist = () => {
   });
 
   return (
-    <>
+    <SafeAreaView style={defaultStyles.container}>
+      {/* <Ionicons
+        name="restaurant-outline"
+        size={32}
+        color={Colors.primary}
+        style={{ alignSelf: "center", margin: 10 }}
+      /> */}
       <View style={styles.searchContainer}>
         <View
           style={[
@@ -64,29 +72,37 @@ const ingredientslist = () => {
             placeholder="Search"
             placeholderTextColor={Colors.grey}
           />
-          <Ionicons name="ios-search-outline" size={24} color={Colors.grey} />
+          <Ionicons
+            name="ios-search-outline"
+            size={24}
+            color={Colors.primary}
+          />
         </View>
       </View>
 
       <ScrollView style={styles.container}>
         <View style={{ marginBottom: 175 }}>
           {searchIngredients.length > 0
-            ? searchIngredients.map((ingredient, index) => (
-                <Ingredient
-                  key={index}
-                  ingredient={ingredient}
-                  handleAdd={handleAdd}
-                  handleRemove={handleRemove}
-                />
-              ))
-            : ingreData.map((ingredient, index) => (
-                <Ingredient
-                  key={index}
-                  ingredient={ingredient}
-                  handleAdd={handleAdd}
-                  handleRemove={handleRemove}
-                />
-              ))}
+            ? searchIngredients
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map((ingredient, index) => (
+                  <Ingredient
+                    key={index}
+                    ingredient={ingredient}
+                    handleAdd={handleAdd}
+                    handleRemove={handleRemove}
+                  />
+                ))
+            : ingreData
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map((ingredient, index) => (
+                  <Ingredient
+                    key={index}
+                    ingredient={ingredient}
+                    handleAdd={handleAdd}
+                    handleRemove={handleRemove}
+                  />
+                ))}
         </View>
       </ScrollView>
       {selectedIngredients.length > 0 ? (
@@ -103,7 +119,7 @@ const ingredientslist = () => {
         </View>
       ) : null}
       <NewIngredient setRefresh={setRefresh} refresh={refresh} />
-    </>
+    </SafeAreaView>
   );
 };
 
@@ -115,7 +131,7 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     padding: 26,
-    backgroundColor: Colors.primary,
+    backgroundColor: "#FDFFFF",
   },
   btnOutline: {
     backgroundColor: "#fff",

@@ -64,6 +64,12 @@ const Page = () => {
 
   return (
     <SafeAreaView style={defaultStyles.container}>
+      <Ionicons
+        name="restaurant-outline"
+        size={40}
+        color={Colors.primary}
+        style={{ alignSelf: "center", margin: 10 }}
+      />
       <View style={styles.headerContainer}>
         <Text style={styles.header}>Profile</Text>
         <Ionicons name="notifications-outline" size={26} />

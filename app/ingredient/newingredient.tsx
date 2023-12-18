@@ -41,7 +41,7 @@ const NewIngredient = ({ setRefresh, refresh }) => {
   return (
     <BottomSheet
       ref={bottomSheetRef}
-      index={1}
+      index={0}
       snapPoints={snapPoints}
       enablePanDownToClose={false}
       handleIndicatorStyle={{ backgroundColor: Colors.grey }}

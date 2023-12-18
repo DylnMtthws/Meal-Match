@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, SafeAreaView } from "react-native";
 import React, { useEffect, useState } from "react";
 import Colors from "@/constants/Colors";
 import { defaultStyles } from "@/constants/Styles";
@@ -12,7 +12,7 @@ import Recipe from "../recipe/recipe";
 import useUniversalRefresh from "@/app/store/refresh";
 
 const Page = () => {
-  const { state } = useUniversalRefresh();
+  const { state, changeState } = useUniversalRefresh();
   const [recipes, setRecipes] = useState([]);
   const [selectedRecipes, setSelectedRecipes] = useState([]);
   const [recipeList, setRecipeList] = useState([]);
@@ -30,7 +30,32 @@ const Page = () => {
   }
 
   function addSelected() {
-    setRecipeList(selectedRecipes);
+    selectedRecipes.forEach((recipe) => {
+      const recipe_id = recipe.id;
+      fetch("http://localhost:5555/selections", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ recipe_id }),
+      })
+        .then((response) => {
+          if (response.status === 201) {
+            console.log(
+              `Successfully added recipe with id ${recipe_id} to selections.`
+            );
+            changeState();
+          } else {
+            console.log(
+              `Failed to add recipe with id ${recipe_id} to selections.`
+            );
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    });
   }
 
   useEffect(() => {
@@ -44,7 +69,18 @@ const Page = () => {
   });
 
   return (
-    <>
+    <SafeAreaView style={defaultStyles.container}>
+      <Ionicons
+        name="restaurant-outline"
+        size={40}
+        color={Colors.primary}
+        style={{ alignSelf: "center", margin: 10 }}
+        onPress={() => {
+          fetch("http://localhost:5555/recipes")
+            .then((r) => r.json())
+            .then((data) => setRecipes(data));
+        }}
+      />
       <View style={styles.searchContainer}>
         <View
           style={[
@@ -57,24 +93,34 @@ const Page = () => {
             placeholder="Search"
             placeholderTextColor={Colors.grey}
           />
-          <Ionicons name="ios-search-outline" size={24} color={Colors.grey} />
+          <Ionicons
+            name="ios-search-outline"
+            size={24}
+            color={Colors.primary}
+          />
         </View>
       </View>
 
       <ScrollView style={styles.container}>
-        <View style={selectedRecipes.length > 0 ? { marginBottom: 100 } : null}>
+        <View
+          style={
+            selectedRecipes.length > 0
+              ? { marginBottom: 100 }
+              : { marginBottom: 25 }
+          }
+        >
           {searchRecipes.length > 0
-            ? searchRecipes.map((recipe) => (
+            ? searchRecipes.map((recipe, index) => (
                 <Recipe
-                  key={recipe.id}
+                  key={index}
                   recipe={recipe}
                   handleAdd={handleAdd}
                   handleRemove={handleRemove}
                 />
               ))
-            : recipes.map((recipe) => (
+            : recipes.map((recipe, index) => (
                 <Recipe
-                  key={recipe.id}
+                  key={index}
                   recipe={recipe}
                   handleAdd={handleAdd}
                   handleRemove={handleRemove}
@@ -97,7 +143,7 @@ const Page = () => {
           </TouchableOpacity>
         </View>
       ) : null}
-    </>
+    </SafeAreaView>
   );
 };
 
@@ -109,7 +155,7 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     padding: 26,
-    backgroundColor: Colors.primary,
+    // backgroundColor: Colors.primary,
   },
   btnOutline: {
     backgroundColor: "#fff",

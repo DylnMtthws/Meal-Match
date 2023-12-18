@@ -5,6 +5,8 @@ import {
   TouchableOpacity,
   FlatList,
   TouchableOpacityBase,
+  SafeAreaView,
+  ScrollView,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { defaultStyles } from "@/constants/Styles";
@@ -14,12 +16,12 @@ import Colors from "@/constants/Colors";
 import DBIngredients from "@/assets/data/ingredients.json";
 import { Link } from "expo-router";
 import useIngredientStore from "../store/ingredientstore";
-import useStateReset from "@/app/store/refresh";
+import useUniversalRefresh from "@/app/store/refresh";
 
 const CreateNewRecipe = () => {
   const { ingredientsList, removeIngredient, clearIngredientsList } =
     useIngredientStore();
-  const { changeState, state } = useStateReset();
+  const { changeState, state } = useUniversalRefresh();
   const [name, setName] = useState("");
   const handleChange = (text) => {
     setName({
@@ -67,92 +69,104 @@ const CreateNewRecipe = () => {
     removeIngredient(ingredient);
   }
   return (
-    <View style={styles.container}>
-      <TextInput
-        style={[defaultStyles.inputField, { marginBottom: 30 }]}
-        placeholder="Recipe Name"
-        placeholderTextColor="#000"
-        onChangeText={handleChange}
-        value={name.name}
+    <SafeAreaView style={defaultStyles.container}>
+      <Ionicons
+        name="restaurant-outline"
+        size={40}
+        color={Colors.primary}
+        style={{ alignSelf: "center", margin: 10 }}
       />
+      <View style={styles.container}>
+        <TextInput
+          style={[defaultStyles.inputField, { marginBottom: 30 }]}
+          placeholder="Recipe Name"
+          placeholderTextColor="#000"
+          onChangeText={handleChange}
+          value={name.name}
+        />
 
-      <Link
-        href={"/(modals)/ingredientslist"}
-        asChild
-        style={[styles.btnOutline, { marginBottom: 20 }]}
-      >
-        <TouchableOpacity>
-          <Ionicons
-            name="add-circle-outline"
-            size={24}
-            style={defaultStyles.btnIcon}
+        <Link
+          href={"/ingredient/ingredientslist"}
+          asChild
+          style={[styles.btnOutline, { marginBottom: 20 }]}
+        >
+          <TouchableOpacity>
+            <Ionicons
+              name="add-circle-outline"
+              size={24}
+              style={defaultStyles.btnIcon}
+            />
+            <Text style={styles.btnOutlineText}>Add Ingredients</Text>
+          </TouchableOpacity>
+        </Link>
+
+        <View style={styles.seperatorView}>
+          <View
+            style={{
+              flex: 1,
+              borderBottomColor: "black",
+              borderBottomWidth: StyleSheet.hairlineWidth,
+            }}
           />
-          <Text style={styles.btnOutlineText}>Add Ingredients</Text>
-        </TouchableOpacity>
-      </Link>
+          <Ionicons
+            style={styles.seperator}
+            name="chevron-down-outline"
+            size={24}
+          />
+          <View
+            style={{
+              flex: 1,
+              borderBottomColor: "black",
+              borderBottomWidth: StyleSheet.hairlineWidth,
+            }}
+          />
+        </View>
 
-      <View style={styles.seperatorView}>
-        <View
-          style={{
-            flex: 1,
-            borderBottomColor: "black",
-            borderBottomWidth: StyleSheet.hairlineWidth,
-          }}
-        />
-        <Ionicons
-          style={styles.seperator}
-          name="chevron-down-outline"
-          size={24}
-        />
-        <View
-          style={{
-            flex: 1,
-            borderBottomColor: "black",
-            borderBottomWidth: StyleSheet.hairlineWidth,
-          }}
-        />
-      </View>
-
-      <View>
-        {ingredientsList &&
-          ingredientsList.map((ingredient) => (
-            <View
-              key={ingredient.id}
-              style={[
-                styles.btnOutline,
-                {
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  marginBottom: 30,
-                },
-              ]}
-            >
-              <Text style={styles.btnOutlineText}>{ingredient.name}</Text>
-              <Ionicons
-                name="remove-circle-outline"
+        <ScrollView>
+          {ingredientsList &&
+            ingredientsList.map((ingredient) => (
+              <View
+                key={ingredient.id}
                 style={[
-                  defaultStyles.btnIcon,
-                  { marginLeft: 325, color: Colors.red },
+                  styles.btnOutline,
+                  {
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    marginBottom: 35,
+                  },
                 ]}
-                size={24}
-                onPress={() => handleRemove(ingredient)}
-              />
-            </View>
-          ))}
-      </View>
+              >
+                <Text style={styles.btnOutlineText}>{ingredient.name}</Text>
+                <Ionicons
+                  name="remove-circle-outline"
+                  style={[
+                    defaultStyles.btnIcon,
+                    { marginLeft: 325, color: Colors.red },
+                  ]}
+                  size={24}
+                  onPress={() => handleRemove(ingredient)}
+                />
+              </View>
+            ))}
+        </ScrollView>
 
-      <View style={styles.absoluteView}>
-        <TouchableOpacity style={styles.btn} onPress={handleSubmit}>
-          <Text style={{ fontFamily: "sat-sb", color: "#fff" }}>Create</Text>
-          <Ionicons
-            name="paper-plane-outline"
-            size={24}
-            style={{ marginLeft: 10 }}
-            color={"#fff"}
-          />
-        </TouchableOpacity>
+        <View style={styles.absoluteView}>
+          {ingredientsList.length > 0 ? (
+            <TouchableOpacity style={styles.btn} onPress={handleSubmit}>
+              <Text style={{ fontFamily: "sat-sb", color: "#fff" }}>
+                Create
+              </Text>
+              <Ionicons
+                name="paper-plane-outline"
+                size={24}
+                style={{ marginLeft: 10 }}
+                color={"#fff"}
+              />
+            </TouchableOpacity>
+          ) : null}
+        </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 
