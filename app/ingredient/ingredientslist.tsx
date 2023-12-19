@@ -85,9 +85,9 @@ const ingredientslist = () => {
           {searchIngredients.length > 0
             ? searchIngredients
                 .sort((a, b) => a.name.localeCompare(b.name))
-                .map((ingredient, index) => (
+                .map((ingredient) => (
                   <Ingredient
-                    key={index}
+                    key={ingredient.id}
                     ingredient={ingredient}
                     handleAdd={handleAdd}
                     handleRemove={handleRemove}
@@ -95,9 +95,9 @@ const ingredientslist = () => {
                 ))
             : ingreData
                 .sort((a, b) => a.name.localeCompare(b.name))
-                .map((ingredient, index) => (
+                .map((ingredient) => (
                   <Ingredient
-                    key={index}
+                    key={ingredient.id}
                     ingredient={ingredient}
                     handleAdd={handleAdd}
                     handleRemove={handleRemove}

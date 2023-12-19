@@ -45,7 +45,7 @@ const Layout = () => {
       <Tabs.Screen
         name="recipes"
         options={{
-          tabBarLabel: "Recipes",
+          tabBarLabel: "Meals",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="list-outline" color={color} size={size} />
           ),

@@ -22,6 +22,26 @@ const Page = () => {
     setSelectedRecipes([...selectedRecipes, newRecipe]);
   }
 
+  function handleDelete(deletedRecipe) {
+    fetch(`http://localhost:5555/recipes/${deletedRecipe.id}`, {
+      method: "DELETE",
+    }).then((response) => {
+      if (response.ok) {
+        console.log("Recipe deleted successfully");
+      } else {
+        throw new Error("Error deleting recipe");
+      }
+    });
+    onDelete(deletedRecipe);
+  }
+
+  function onDelete(deletedRecipe) {
+    const filteredRecipes = recipes.filter((recipe) => {
+      return recipe.id !== deletedRecipe.id;
+    });
+    setRecipes(filteredRecipes);
+  }
+
   function handleRemove(removeRecipe) {
     const filteredRecipes = selectedRecipes.filter((recipe) => {
       return recipe.id !== removeRecipe.id;
@@ -110,20 +130,22 @@ const Page = () => {
           }
         >
           {searchRecipes.length > 0
-            ? searchRecipes.map((recipe, index) => (
+            ? searchRecipes.map((recipe) => (
                 <Recipe
-                  key={index}
+                  key={recipe.id}
                   recipe={recipe}
                   handleAdd={handleAdd}
                   handleRemove={handleRemove}
+                  handleDelete={handleDelete}
                 />
               ))
-            : recipes.map((recipe, index) => (
+            : recipes.map((recipe) => (
                 <Recipe
-                  key={index}
+                  key={recipe.id}
                   recipe={recipe}
                   handleAdd={handleAdd}
                   handleRemove={handleRemove}
+                  handleDelete={handleDelete}
                 />
               ))}
         </View>

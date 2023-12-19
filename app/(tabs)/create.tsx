@@ -79,7 +79,7 @@ const CreateNewRecipe = () => {
       <View style={styles.container}>
         <TextInput
           style={[defaultStyles.inputField, { marginBottom: 30 }]}
-          placeholder="Recipe Name"
+          placeholder="Enter Meal Name"
           placeholderTextColor="#000"
           onChangeText={handleChange}
           value={name.name}
