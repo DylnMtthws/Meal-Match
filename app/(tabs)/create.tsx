@@ -152,11 +152,7 @@ const CreateNewRecipe = () => {
               borderBottomWidth: StyleSheet.hairlineWidth,
             }}
           />
-          <Ionicons
-            style={styles.seperator}
-            name="chevron-down-outline"
-            size={24}
-          />
+          <Ionicons style={styles.seperator} name="list-outline" size={40} />
           <View
             style={{
               flex: 1,

@@ -88,6 +88,15 @@ const Page = () => {
     return recipe.name.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
+  const CATEGORIES = [
+    "Breakfast",
+    "Lunch",
+    "Dinner",
+    "Snack",
+    "Dessert",
+    "Beverage",
+  ];
+
   return (
     <SafeAreaView style={defaultStyles.container}>
       <Ionicons

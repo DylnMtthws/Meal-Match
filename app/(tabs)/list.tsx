@@ -77,7 +77,69 @@ const GroceryList = () => {
     (a, b) => a.name.toLowerCase() === b.name.toLowerCase()
   );
 
-  console.log(groceryList);
+  function sectionComponent(category) {
+    const list = categorizedItems[category].map((item) => (
+      <GroceryItem key={item.id} item={item} />
+    ));
+    return list.length > 0 ? (
+      <>
+        {categoryHeader(category)}
+        {list}
+      </>
+    ) : null;
+  }
+
+  const categoryHeader = (category) => (
+    <View style={styles.seperatorView}>
+      <View
+        style={{
+          flex: 1,
+          borderBottomColor: "black",
+          borderBottomWidth: StyleSheet.hairlineWidth,
+        }}
+      />
+      <Text style={styles.seperator}>{category}</Text>
+      <View
+        style={{
+          flex: 1,
+          borderBottomColor: "black",
+          borderBottomWidth: StyleSheet.hairlineWidth,
+        }}
+      />
+    </View>
+  );
+
+  const categorizedItems = {
+    Produce: groceryList.filter((item) => item.category === "Produce"),
+    "Meat & Seafood": groceryList.filter(
+      (item) => item.category === "Meat & Seafood"
+    ),
+    Pantry: groceryList.filter((item) => item.category === "Pantry"),
+    Frozen: groceryList.filter((item) => item.category === "Frozen"),
+    "Snacks & Sweets": groceryList.filter(
+      (item) => item.category === "Snacks & Sweets"
+    ),
+    "Dairy & Eggs": groceryList.filter(
+      (item) => item.category === "Dairy & Eggs"
+    ),
+    Miscellaneous: groceryList.filter(
+      (item) => item.category === "Miscellaneous"
+    ),
+  };
+
+  const CATEGORIES = [
+    "Produce",
+    "Meat & Seafood",
+    "Pantry",
+    "Frozen",
+    "Snacks & Sweets",
+    "Dairy & Eggs",
+    "Miscellaneous",
+  ];
+
+  // const ogMap = groceryList.map((item) => (
+  //   <GroceryItem key={item.id} item={item} />
+  // ));
 
   return (
     <SafeAreaView style={defaultStyles.container}>
@@ -94,9 +156,12 @@ const GroceryList = () => {
       />
 
       <ScrollView style={styles.container}>
-        {groceryList.map((item, index) => (
-          <GroceryItem key={index} item={item} />
+        {CATEGORIES.map((category) => (
+          <React.Fragment key={category}>
+            {sectionComponent(category)}
+          </React.Fragment>
         ))}
+
         {groceryList.length < 1 ? (
           <View>
             <TouchableOpacity
@@ -118,17 +183,27 @@ const GroceryList = () => {
           </View>
         ) : (
           <View>
+            <View
+              style={{
+                flex: 1,
+                borderBottomColor: "black",
+                borderBottomWidth: StyleSheet.hairlineWidth,
+              }}
+            />
             <TouchableOpacity
-              style={styles.deleteButton}
+              style={[
+                styles.deleteButton,
+                { marginBottom: 50, marginTop: 25, marginLeft: 25 },
+              ]}
               onPress={handleDeleteAll}
             >
               <Text style={styles.deleteButtonText}>
                 Finished shopping? Click to clear
               </Text>
               <Ionicons
-                name="trash-bin-outline"
+                name="trash-outline"
                 color={Colors.red}
-                size={24}
+                size={32}
                 style={{ marginRight: 50 }}
               />
             </TouchableOpacity>
@@ -149,6 +224,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
     padding: 26,
+    marginBottom: 65,
   },
   deleteButton: {
     marginBottom: 20,
@@ -162,6 +238,17 @@ const styles = StyleSheet.create({
     color: Colors.dark,
     fontSize: 16,
     fontFamily: "sat-li",
+  },
+  seperatorView: {
+    flexDirection: "row",
+    gap: 10,
+    alignItems: "center",
+    marginVertical: 30,
+  },
+  seperator: {
+    fontFamily: "sat-li",
+    color: Colors.grey,
+    fontSize: 16,
   },
 });
 

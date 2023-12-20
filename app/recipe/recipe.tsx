@@ -100,7 +100,7 @@ const Recipe = ({ recipe, handleAdd, handleRemove, handleDelete }) => {
             />
           ) : (
             <Text style={[defaultStyles.btnText, { marginLeft: 10 }]}>
-              {name}
+              {name.length > 15 ? `${name.substring(0, 15)}...` : name}
             </Text>
           )}
 
@@ -130,7 +130,9 @@ const Recipe = ({ recipe, handleAdd, handleRemove, handleDelete }) => {
               onChangeText={handleChange}
             />
           ) : (
-            <Text style={styles.btnOutlineText}>{name}</Text>
+            <Text style={styles.btnOutlineText}>
+              {name.length > 15 ? `${name.substring(0, 15)}...` : name}
+            </Text>
           )}
 
           <Ionicons name="add-outline" size={24} color={Colors.grey} />
