@@ -131,12 +131,15 @@ const ingredientslist = () => {
       </ScrollView>
       {selectedIngredients.length > 0 ? (
         <View style={styles.absoluteView}>
-          <TouchableOpacity style={styles.btn} onPress={addSelected}>
+          <TouchableOpacity
+            style={[styles.btn, { borderWidth: 1, borderColor: "#fff" }]}
+            onPress={addSelected}
+          >
             <Text style={{ fontFamily: "sat-sb", color: "#fff" }}>Add</Text>
             <Ionicons
               name="add-circle-outline"
               size={24}
-              style={{ marginLeft: 10 }}
+              style={{ marginLeft: 10, paddingBottom: 25 }}
               color={"#fff"}
             />
           </TouchableOpacity>

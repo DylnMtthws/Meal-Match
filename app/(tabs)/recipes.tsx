@@ -219,7 +219,10 @@ const Page = () => {
       </ScrollView>
       {selectedRecipes.length > 0 ? (
         <View style={styles.absoluteView}>
-          <TouchableOpacity style={styles.btn} onPress={addSelected}>
+          <TouchableOpacity
+            style={[styles.btn, { borderWidth: 1, borderColor: "#fff" }]}
+            onPress={addSelected}
+          >
             <Text style={{ fontFamily: "sat-sb", color: "#fff" }}>
               Generate Grocery List
             </Text>
