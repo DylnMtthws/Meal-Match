@@ -17,6 +17,7 @@ import DBIngredients from "@/assets/data/ingredients.json";
 import { Link } from "expo-router";
 import useIngredientStore from "../store/ingredientstore";
 import useUniversalRefresh from "@/app/store/refresh";
+import SelectDropdown from "react-native-select-dropdown";
 
 const CreateNewRecipe = () => {
   const { ingredientsList, removeIngredient, clearIngredientsList } =
@@ -30,13 +31,29 @@ const CreateNewRecipe = () => {
     });
   };
 
+  const handleCategoryChange = (selectedItem, index) => {
+    setCategory(selectedItem);
+  };
+
+  const [category, setCategory] = useState("");
+
+  const CATEGORIES = [
+    "Breakfast",
+    "Lunch",
+    "Dinner",
+    "Snack",
+    "Dessert",
+    "Beverage",
+  ];
+
   const handleSubmit = () => {
+    const data = { ...name, category: category };
     fetch("http://localhost:5555/recipes", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(name),
+      body: JSON.stringify(data),
     })
       .then((r) => r.json())
       .then((recipe) => {
@@ -60,6 +77,7 @@ const CreateNewRecipe = () => {
       })
       .then(() => {
         setName({ name: "" });
+        setCategory("");
         clearIngredientsList();
         changeState();
       });
@@ -83,6 +101,32 @@ const CreateNewRecipe = () => {
           placeholderTextColor="#000"
           onChangeText={handleChange}
           value={name.name}
+        />
+
+        <SelectDropdown
+          buttonStyle={[styles.btnOutline, { marginBottom: 20, width: 380 }]}
+          buttonTextStyle={{
+            color: Colors.dark,
+            fontFamily: "sat-sb",
+            marginLeft: -15,
+            fontSize: 16,
+          }}
+          dropdownStyle={{ borderRadius: 10 }}
+          data={CATEGORIES}
+          renderDropdownIcon={() => (
+            <Ionicons
+              name="chevron-down-outline"
+              size={24}
+              color={Colors.dark}
+            />
+          )}
+          onSelect={handleCategoryChange}
+          buttonTextAfterSelection={(selectedItem, index) => {
+            return selectedItem;
+          }}
+          rowTextForSelection={(item, index) => {
+            return item;
+          }}
         />
 
         <Link
@@ -188,7 +232,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   btnOutlineText: {
-    color: "#000",
+    color: Colors.dark,
     fontSize: 16,
     fontFamily: "sat-sb",
   },

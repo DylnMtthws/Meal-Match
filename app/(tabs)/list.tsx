@@ -12,10 +12,16 @@ import { ScrollView } from "react-native-gesture-handler";
 import { defaultStyles } from "@/constants/Styles";
 import { Ionicons } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
+import NewItem from "../groceryitem/newitem";
 
 const GroceryList = () => {
   const [selectionData, setSelectionData] = useState([]);
   const state = useUniversalRefresh((state) => state);
+  const [refresh, setRefresh] = useState<number>(0);
+
+  function handleAdd() {
+    null;
+  }
 
   useEffect(() => {
     fetch("http://localhost:5555/selections")
@@ -71,6 +77,8 @@ const GroceryList = () => {
     (a, b) => a.name.toLowerCase() === b.name.toLowerCase()
   );
 
+  console.log(groceryList);
+
   return (
     <SafeAreaView style={defaultStyles.container}>
       <Ionicons
@@ -84,16 +92,54 @@ const GroceryList = () => {
             .then((data) => setSelectionData(data));
         }}
       />
-      <View>
-        <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteAll}>
-          <Text style={styles.deleteButtonText}>Delete List</Text>
-        </TouchableOpacity>
-      </View>
+
       <ScrollView style={styles.container}>
         {groceryList.map((item, index) => (
           <GroceryItem key={index} item={item} />
         ))}
+        {groceryList.length < 1 ? (
+          <View>
+            <TouchableOpacity
+              style={[
+                styles.deleteButton,
+                { alignSelf: "center", marginTop: 250, marginLeft: 50 },
+              ]}
+            >
+              <Text style={styles.deleteButtonText}>
+                Good luck shopping an empty list!
+              </Text>
+              <Ionicons
+                name="cart-outline"
+                color={Colors.primary}
+                size={24}
+                style={{ marginRight: 50, marginLeft: 25 }}
+              />
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View>
+            <TouchableOpacity
+              style={styles.deleteButton}
+              onPress={handleDeleteAll}
+            >
+              <Text style={styles.deleteButtonText}>
+                Finished shopping? Click to clear
+              </Text>
+              <Ionicons
+                name="trash-bin-outline"
+                color={Colors.red}
+                size={24}
+                style={{ marginRight: 50 }}
+              />
+            </TouchableOpacity>
+          </View>
+        )}
       </ScrollView>
+      <NewItem
+        refresh={refresh}
+        setRefresh={setRefresh}
+        handleAdd={handleAdd}
+      />
     </SafeAreaView>
   );
 };
@@ -107,12 +153,15 @@ const styles = StyleSheet.create({
   deleteButton: {
     marginBottom: 20,
     padding: 10,
-    backgroundColor: "#ff0000",
+    backgroundColor: "#FFF",
     alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   deleteButtonText: {
-    color: "#fff",
-    fontSize: 18,
+    color: Colors.dark,
+    fontSize: 16,
+    fontFamily: "sat-li",
   },
 });
 

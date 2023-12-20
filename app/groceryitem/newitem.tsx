@@ -7,13 +7,18 @@ import { Ionicons } from "@expo/vector-icons";
 import { defaultStyles } from "@/constants/Styles";
 import SelectDropdown from "react-native-select-dropdown";
 
-const NewIngredient = ({ setRefresh, refresh }) => {
+const NewItem = ({ handleAdd }) => {
   const bottomSheetRef = useRef<BottomSheet>(null);
-  const snapPoints = useMemo(() => ["10%", "35%"], []);
+  const snapPoints = useMemo(() => ["7.5%", "35%"], []);
   const [categorySubmit, setCategorySubmit] = useState(false);
   const [form, setForm] = useState({
     name: "",
   });
+
+  function onAdd() {
+    data = { ...form, category: category };
+    handleAdd(data);
+  }
 
   const handleChange = (text) => {
     setForm({
@@ -30,6 +35,9 @@ const NewIngredient = ({ setRefresh, refresh }) => {
   const [category, setCategory] = useState("");
 
   const CATEGORIES = [
+    "Household",
+    "Beverages",
+    "Personal Care",
     "Produce",
     "Meat & Seafood",
     "Pantry",
@@ -39,21 +47,24 @@ const NewIngredient = ({ setRefresh, refresh }) => {
     "Miscellaneous",
   ];
 
-  const handleSubmit = () => {
-    const data = { ...form, category: category };
-    fetch("http://localhost:5555/ingredients", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    })
-      .then((r) => r.json())
-      .then(showIngredients);
-    setForm({ name: "" });
-    setCategory("");
-    setCategorySubmit(false);
-  };
+  // const handleSubmit = () => {
+  //   const data = { ...form, category: category };
+  //   fetch("http://localhost:5555/grocery_items", {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //     body: JSON.stringify(data),
+  //   })
+  //     .then((r) => r.json())
+  //     .then((data) => console.log(data))
+  //     .then(() => {
+  //       showIngredients();
+  //       setForm({ name: "" });
+  //       setCategory("");
+  //       setCategorySubmit(false);
+  //     });
+  // };
 
   const showIngredients = () => {
     bottomSheetRef.current?.collapse();
@@ -70,11 +81,11 @@ const NewIngredient = ({ setRefresh, refresh }) => {
       style={styles.sheetContainer}
     >
       <Text style={[styles.bottomHeader, { marginBottom: 15 }]}>
-        Don't see what you're looking for?
+        Forget something? Add it to the list!
       </Text>
       <View style={styles.contentContainer}>
         <TextInput
-          placeholder="Create a new ingredient"
+          placeholder="Create a new item"
           placeholderTextColor={Colors.grey}
           style={[defaultStyles.inputField, { marginBottom: 20 }]}
           value={form.name}
@@ -109,7 +120,7 @@ const NewIngredient = ({ setRefresh, refresh }) => {
           defaultButtonText="Select an option"
         />
         <View style={styles.absoluteView}>
-          <TouchableOpacity onPress={handleSubmit} style={styles.btn}>
+          <TouchableOpacity onPress={() => handleAdd()} style={styles.btn}>
             <Text style={{ fontFamily: "sat-sb", color: "#fff" }}>Create</Text>
             <Ionicons
               name="paper-plane-outline"
@@ -176,4 +187,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default NewIngredient;
+export default NewItem;

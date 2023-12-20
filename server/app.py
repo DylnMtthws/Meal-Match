@@ -9,7 +9,7 @@ from flask_restful import Resource
 # Local imports
 from config import app, db, api
 # Add your model imports
-from models import Recipe, Ingredient, RecipeIngredient, Selections
+from models import Recipe, Ingredient, RecipeIngredient, Selections, GroceryList
 
 
 class Recipes(Resource):
@@ -23,6 +23,7 @@ class Recipes(Resource):
         try:
             new_recipe = Recipe(
                 name=data['name'],
+                category=data['category']
             )
             db.session.add(new_recipe)
             db.session.commit()
@@ -86,6 +87,7 @@ class Ingredients(Resource):
         try:
             new_ingredient = Ingredient(
                 name=data["name"],
+                category=data['category']
             )
             db.session.add(new_ingredient)
             db.session.commit()
@@ -269,6 +271,82 @@ class SelectionsById(Resource):
 
 
 api.add_resource(SelectionsById, "/selections/<int:id>")
+
+
+class GroceryItems(Resource):
+
+    def get(self):
+        grocery_items = [item.to_dict()
+                         for item in GroceryList.query.all()]
+        return grocery_items, 200
+
+    def post(self):
+        data = request.get_json()
+        try:
+            new_item = GroceryList(
+                name=data['name'],
+                category=data['category']
+            )
+            db.session.add(new_item)
+            db.session.commit()
+            return new_item.to_dict(), 200
+        except ValueError:
+            return {
+                "errors": ["validation errors"]
+            }, 400
+
+    def delete(self):
+        items = GroceryList.query.all()
+        if not items:
+            return {"error": "Event not found"}, 404
+
+        for item in items:
+            db.session.delete(item)
+        db.session.commit()
+        return "", 204
+
+
+api.add_resource(GroceryItems, "/grocery_items")
+
+
+class GroceryItemById(Resource):
+
+    def get(self, id):
+        item = GroceryList.query.filter_by(id=id).first()
+        return item.to_dict(), 200
+
+    def delete(self, id):
+        item = GroceryList.query.filter_by(id=id).first()
+        if not item:
+            return {"error": "Event not found"}, 404
+
+        db.session.delete(item)
+        db.session.commit()
+        return "", 204
+
+    def patch(self, id):
+        item = GroceryList.query.filter_by(id=id).first()
+        if not item:
+            return {
+                "error": "Event not found"
+            }, 404
+        data = request.get_json()
+
+        try:
+            for key in data:
+                setattr(item, key, data[key])
+            db.session.add(item)
+            db.session.commit()
+        except ValueError as e:
+            print(e.__str__())
+            return {
+                "error": "validation errors"
+            }, 400
+
+        return item.to_dict(), 200
+
+
+api.add_resource(GroceryItemById, "/grocery_items/<int:id>")
 
 
 @app.route('/')

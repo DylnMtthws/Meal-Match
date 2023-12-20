@@ -9,6 +9,7 @@ class Recipe(db.Model, SerializerMixin):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
+    category = db.Column(db.String, nullable=False)
 
     recipe_ingredients = db.relationship(
         'RecipeIngredient', back_populates='recipe', cascade="all, delete")
@@ -32,6 +33,7 @@ class Ingredient(db.Model, SerializerMixin):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
+    category = db.Column(db.String, nullable=False)
 
     recipe_ingredients = db.relationship(
         'RecipeIngredient', back_populates='ingredient', cascade='all, delete')
@@ -83,3 +85,20 @@ class Selections(db.Model, SerializerMixin):
 
     def __repr__(self):
         return f'<Selections {self.id}>'
+
+
+class GroceryList(db.Model):
+    __tablename__ = 'grocery_list'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+    category = db.Column(db.String)
+
+    @validates('name')
+    def validate_name(self, key, name):
+        if not name:
+            raise ValueError('Name required')
+        return name
+
+    def __repr__(self):
+        return f'<GroceryList {self.id}>'
