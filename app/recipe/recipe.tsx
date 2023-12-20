@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, TextInput, Alert } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   TouchableOpacity,
   Swipeable,
@@ -13,12 +13,16 @@ import useUniversalRefresh from "../store/refresh";
 const Recipe = ({ recipe, handleAdd, handleRemove, handleDelete }) => {
   const [add, setAdd] = useState(false);
   const [edit, setEdit] = useState(false);
-  const { changeState } = useUniversalRefresh();
+  const { changeState, state } = useUniversalRefresh();
 
   const [name, setName] = useState(recipe.name);
   const handleChange = (text) => {
     setName(text);
   };
+
+  useEffect(() => {
+    setAdd(false);
+  }, [state]);
 
   const handleSubmit = () => {
     const newName = { name: name };
@@ -100,7 +104,7 @@ const Recipe = ({ recipe, handleAdd, handleRemove, handleDelete }) => {
             />
           ) : (
             <Text style={[defaultStyles.btnText, { marginLeft: 10 }]}>
-              {name.length > 15 ? `${name.substring(0, 15)}...` : name}
+              {name.length > 25 ? `${name.substring(0, 25)}...` : name}
             </Text>
           )}
 
@@ -131,7 +135,7 @@ const Recipe = ({ recipe, handleAdd, handleRemove, handleDelete }) => {
             />
           ) : (
             <Text style={styles.btnOutlineText}>
-              {name.length > 15 ? `${name.substring(0, 15)}...` : name}
+              {name.length > 25 ? `${name.substring(0, 25)}...` : name}
             </Text>
           )}
 

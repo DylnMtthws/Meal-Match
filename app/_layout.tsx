@@ -36,6 +36,7 @@ export default function RootLayout() {
     "sat-li": require("../assets/fonts/Satoshi-Light.otf"),
     "sat-sb": require("../assets/fonts/Satoshi-Medium.otf"),
     "sat-b": require("../assets/fonts/Satoshi-Bold.otf"),
+    "meal-match": require("../assets/fonts/Kalam-Regular.otf"),
   });
 
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.

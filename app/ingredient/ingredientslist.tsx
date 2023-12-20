@@ -52,6 +52,24 @@ const ingredientslist = () => {
     return ingredient.name.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
+  function unique(a, fn) {
+    if (a.length === 0 || a.length === 1) {
+      return a;
+    }
+    if (!fn) {
+      return a;
+    }
+
+    for (let i = 0; i < a.length; i++) {
+      for (let j = i + 1; j < a.length; j++) {
+        if (fn(a[i], a[j])) {
+          a.splice(i, 1);
+        }
+      }
+    }
+    return a;
+  }
+
   return (
     <SafeAreaView style={defaultStyles.container}>
       {/* <Ionicons
@@ -83,26 +101,32 @@ const ingredientslist = () => {
       <ScrollView style={styles.container}>
         <View style={{ marginBottom: 175 }}>
           {searchIngredients.length > 0
-            ? searchIngredients
-                .sort((a, b) => a.name.localeCompare(b.name))
-                .map((ingredient) => (
-                  <Ingredient
-                    key={ingredient.id}
-                    ingredient={ingredient}
-                    handleAdd={handleAdd}
-                    handleRemove={handleRemove}
-                  />
-                ))
-            : ingreData
-                .sort((a, b) => a.name.localeCompare(b.name))
-                .map((ingredient) => (
-                  <Ingredient
-                    key={ingredient.id}
-                    ingredient={ingredient}
-                    handleAdd={handleAdd}
-                    handleRemove={handleRemove}
-                  />
-                ))}
+            ? unique(
+                searchIngredients
+                  .sort((a, b) => a.name.localeCompare(b.name))
+                  .map((ingredient) => (
+                    <Ingredient
+                      key={ingredient.id}
+                      ingredient={ingredient}
+                      handleAdd={handleAdd}
+                      handleRemove={handleRemove}
+                    />
+                  )),
+                (a, b) => a.props.ingredient.id === b.props.ingredient.id
+              )
+            : unique(
+                ingreData
+                  .sort((a, b) => a.name.localeCompare(b.name))
+                  .map((ingredient) => (
+                    <Ingredient
+                      key={ingredient.id}
+                      ingredient={ingredient}
+                      handleAdd={handleAdd}
+                      handleRemove={handleRemove}
+                    />
+                  )),
+                (a, b) => a.props.ingredient.id === b.props.ingredient.id
+              )}
         </View>
       </ScrollView>
       {selectedIngredients.length > 0 ? (

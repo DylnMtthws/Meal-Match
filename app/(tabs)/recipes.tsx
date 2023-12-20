@@ -18,6 +18,10 @@ const Page = () => {
   const [recipeList, setRecipeList] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
 
+  useEffect(() => {
+    setSelectedRecipes([]);
+  }, [state]);
+
   function handleAdd(newRecipe) {
     setSelectedRecipes([...selectedRecipes, newRecipe]);
   }
@@ -97,6 +101,74 @@ const Page = () => {
     "Beverage",
   ];
 
+  const categoryHeader = (category) => (
+    <View style={styles.seperatorView}>
+      <View
+        style={{
+          flex: 1,
+          borderBottomColor: "black",
+          borderBottomWidth: StyleSheet.hairlineWidth,
+        }}
+      />
+      <Text style={styles.seperator}>{category}</Text>
+      <View
+        style={{
+          flex: 1,
+          borderBottomColor: "black",
+          borderBottomWidth: StyleSheet.hairlineWidth,
+        }}
+      />
+    </View>
+  );
+
+  const categorizedItems = {
+    Breakfast: recipes.filter((item) => item.category === "Breakfast"),
+    Lunch: recipes.filter((item) => item.category === "Lunch"),
+    Dinner: recipes.filter((item) => item.category === "Dinner"),
+    Snack: recipes.filter((item) => item.category === "Snack"),
+    Dessert: recipes.filter((item) => item.category === "Dessert"),
+    Beverage: recipes.filter((item) => item.category === "Beverage"),
+  };
+
+  function sectionComponent(category) {
+    const list = categorizedItems[category].map((recipe) => (
+      <Recipe
+        key={recipe.id}
+        recipe={recipe}
+        handleAdd={handleAdd}
+        handleRemove={handleRemove}
+        handleDelete={handleDelete}
+      />
+    ));
+    return list.length > 0 ? (
+      <>
+        {categoryHeader(category)}
+        {list}
+      </>
+    ) : null;
+  }
+
+  // const ogMap =
+  //   searchRecipes.length > 0
+  //     ? searchRecipes.map((recipe) => (
+  //         <Recipe
+  //           key={recipe.id}
+  //           recipe={recipe}
+  //           handleAdd={handleAdd}
+  //           handleRemove={handleRemove}
+  //           handleDelete={handleDelete}
+  //         />
+  //       ))
+  //     : recipes.map((recipe) => (
+  //         <Recipe
+  //           key={recipe.id}
+  //           recipe={recipe}
+  //           handleAdd={handleAdd}
+  //           handleRemove={handleRemove}
+  //           handleDelete={handleDelete}
+  //         />
+  //       ));
+
   return (
     <SafeAreaView style={defaultStyles.container}>
       <Ionicons
@@ -110,7 +182,7 @@ const Page = () => {
             .then((data) => setRecipes(data));
         }}
       />
-      <View style={styles.searchContainer}>
+      {/* <View style={styles.searchContainer}>
         <View
           style={[
             defaultStyles.inputField,
@@ -128,7 +200,7 @@ const Page = () => {
             color={Colors.primary}
           />
         </View>
-      </View>
+      </View> */}
 
       <ScrollView style={styles.container}>
         <View
@@ -138,25 +210,11 @@ const Page = () => {
               : { marginBottom: 25 }
           }
         >
-          {searchRecipes.length > 0
-            ? searchRecipes.map((recipe) => (
-                <Recipe
-                  key={recipe.id}
-                  recipe={recipe}
-                  handleAdd={handleAdd}
-                  handleRemove={handleRemove}
-                  handleDelete={handleDelete}
-                />
-              ))
-            : recipes.map((recipe) => (
-                <Recipe
-                  key={recipe.id}
-                  recipe={recipe}
-                  handleAdd={handleAdd}
-                  handleRemove={handleRemove}
-                  handleDelete={handleDelete}
-                />
-              ))}
+          {CATEGORIES.map((category) => (
+            <React.Fragment key={category}>
+              {sectionComponent(category)}
+            </React.Fragment>
+          ))}
         </View>
       </ScrollView>
       {selectedRecipes.length > 0 ? (
@@ -218,6 +276,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     marginHorizontal: "auto",
     alignItems: "center",
+  },
+  seperatorView: {
+    flexDirection: "row",
+    gap: 10,
+    alignItems: "center",
+    marginVertical: 30,
+  },
+  seperator: {
+    fontFamily: "sat-li",
+    color: Colors.grey,
+    fontSize: 16,
   },
 });
 

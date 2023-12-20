@@ -163,31 +163,32 @@ const CreateNewRecipe = () => {
         </View>
 
         <ScrollView>
-          {ingredientsList &&
-            ingredientsList.map((ingredient) => (
-              <View
-                key={ingredient.id}
-                style={[
-                  styles.btnOutline,
-                  {
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    marginBottom: 35,
-                  },
-                ]}
-              >
-                <Text style={styles.btnOutlineText}>{ingredient.name}</Text>
-                <Ionicons
-                  name="remove-circle-outline"
+          {ingredientsList.length > 0
+            ? ingredientsList.map((ingredient) => (
+                <View
+                  key={ingredient.id}
                   style={[
-                    defaultStyles.btnIcon,
-                    { marginLeft: 325, color: Colors.red },
+                    styles.btnOutline,
+                    {
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      marginBottom: 35,
+                    },
                   ]}
-                  size={24}
-                  onPress={() => handleRemove(ingredient)}
-                />
-              </View>
-            ))}
+                >
+                  <Text style={styles.btnOutlineText}>{ingredient.name}</Text>
+                  <Ionicons
+                    name="remove-circle-outline"
+                    style={[
+                      defaultStyles.btnIcon,
+                      { marginLeft: 325, color: Colors.red },
+                    ]}
+                    size={24}
+                    onPress={() => handleRemove(ingredient)}
+                  />
+                </View>
+              ))
+            : null}
         </ScrollView>
 
         <View style={styles.absoluteView}>
@@ -203,7 +204,26 @@ const CreateNewRecipe = () => {
                 color={"#fff"}
               />
             </TouchableOpacity>
-          ) : null}
+          ) : (
+            <View>
+              <TouchableOpacity
+                style={[
+                  styles.deleteButton,
+                  { alignSelf: "center", marginLeft: 50, marginBottom: 200 },
+                ]}
+              >
+                <Text style={styles.deleteButtonText}>
+                  You'll need some ingredients for this meal...
+                </Text>
+                <Ionicons
+                  name="cart-outline"
+                  color={Colors.primary}
+                  size={24}
+                  style={{ marginRight: 50, marginLeft: 15 }}
+                />
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       </View>
     </SafeAreaView>
@@ -258,6 +278,18 @@ const styles = StyleSheet.create({
     fontFamily: "mon-sb",
     color: Colors.grey,
     fontSize: 16,
+  },
+  deleteButton: {
+    padding: 10,
+    backgroundColor: "#FFF",
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  deleteButtonText: {
+    color: Colors.dark,
+    fontSize: 16,
+    fontFamily: "sat-li",
   },
 });
 
