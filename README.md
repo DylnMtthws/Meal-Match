@@ -1,3 +1,5 @@
+VIEW DEMO: https://www.linkedin.com/posts/dylnmtthws_reactnative-reactnativedeveloper-mobiledevelopment-activity-7144292471206723584-gxUl?utm_source=share&utm_medium=member_ios
+
 # MealMatch: Simplifying Meal Planning and Grocery Shopping
 
 MealMatch is a mobile application that streamlines meal planning and grocery shopping. We've all been there, it's Sunday night, you're sitting in your car in the parking lot at Trader Joe's, and you need to get your grocery shopping done before the start of the week. You're pressed for time, you've got work in the morning, and the "Sunday Scaries" are setting in. Who's got any brain power left to think about what they want to eat for the week and then turn that into a grocery list?
