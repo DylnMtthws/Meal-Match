@@ -18,7 +18,7 @@ Grocery List Generation: The app automatically compiles a comprehensive grocery 
 
 # Tech Stack:
 
-Frontend: React Native/Expo, Zustand, TypeScript
+Frontend: React Native/Expo, Zustand, JSX/TSX
 
 Backend: Flask-RESTful
 
