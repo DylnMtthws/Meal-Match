@@ -1,4 +1,4 @@
-VIEW DEMO ---> https://vimeo.com/911256633
+VIEW DEMO ---> [https://vimeo.com/911256633](https://vimeo.com/927695618)
 
 # MealMatch: Simplifying Meal Planning and Grocery Shopping
 
